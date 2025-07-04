@@ -19,7 +19,7 @@ jobs:
 
       - name: Run Mercury finance bot
         env:
-          MERCURY_API_KEY: ${{ secrets.API_KEY }}
+          API_KEY: ${{ secrets.API_KEY }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           ACCOUNT_IN: ${{ secrets.ACCOUNT_IN }}
           ACCOUNT_OUT: ${{ secrets.ACCOUNT_OUT }}
