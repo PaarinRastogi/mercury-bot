@@ -1,0 +1,28 @@
+name: Mercury → Slack Notifier
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # every 30 minutes
+  workflow_dispatch: # manual trigger support
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run Mercury finance bot
+        env:
+          MERCURY_API_KEY: ${{ secrets.API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ACCOUNT_IN: ${{ secrets.ACCOUNT_IN }}
+          ACCOUNT_OUT: ${{ secrets.ACCOUNT_OUT }}
+          ACCOUNT_SAVINGS: ${{ secrets.ACCOUNT_SAVINGS }}
+        run: |
+          python mercury_finance_bot.py
