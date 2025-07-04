@@ -110,10 +110,10 @@ def send_to_slack(text: str):
 
 def fetch_transactions(account_id: str) -> list[dict]:
     """
-    Return up to 20 recent transactions (JSON list) for the given account ID.
+    Return up to 5 recent transactions (JSON list) for the given account ID.
     """
     url = f"https://api.mercury.com/api/v1/account/{account_id}/transactions"
-    params = {"limit": 20, "order": "desc"}
+    params = {"limit": 5, "order": "desc"}
     resp = requests.get(url, headers=BASE_HEADERS, params=params)
     resp.raise_for_status()
     return resp.json().get("transactions", [])
