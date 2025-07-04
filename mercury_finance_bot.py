@@ -30,9 +30,9 @@ def _raise_env_error(var_name: str):
     raise RuntimeError(f"Environment variable {var_name} is required but not set")
 
 def fetch_transactions(account_id: str) -> list[dict]:
-    """Get up to 5 most recent transactions."""
+    """Get up to 15 most recent transactions."""
     url = f"https://api.mercury.com/api/v1/account/{account_id}/transactions"
-    params = {"limit": 5, "order": "desc"}
+    params = {"limit": 15, "order": "desc"}
     resp = requests.get(url, headers=BASE_HEADERS, params=params)
     resp.raise_for_status()
     txs = resp.json().get("transactions", [])
