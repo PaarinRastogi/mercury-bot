@@ -9,8 +9,8 @@ def _raise_env_error(var_name: str):
     raise RuntimeError(f"Environment variable {var_name} is required but not set")
 
 # ——— CONFIG ———
-API_KEY           = os.getenv("API_KEY")            or _raise_env_error("API_KEY")
-SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")  or _raise_env_error("SLACK_WEBHOOK_URL")
+API_KEY           = os.getenv("API_KEY")           or _raise_env_error("API_KEY")
+SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL") or _raise_env_error("SLACK_WEBHOOK_URL")
 
 BASE_ACCOUNT_IDS = {
     "IN":      os.getenv("ACCOUNT_IN")      or _raise_env_error("ACCOUNT_IN"),
@@ -58,9 +58,10 @@ def save_state(state: dict[str, set]):
     logger.info("Saved state: %s", {acct: len(ids) for acct, ids in state.items()})
 
 
-def format_transaction_for_slack(tx: dict) -> str:
+def format_transaction_for_slack(tx: dict, acct_name: str) -> str:
     """
-    Turn a Mercury transaction dict into a Slack-friendly message string.
+    Turn a Mercury transaction dict into a Slack-friendly message string,
+    including the account name in the send/receive line.
     """
     # Parse & reformat timestamp
     date_str = tx["createdAt"]
@@ -70,13 +71,17 @@ def format_transaction_for_slack(tx: dict) -> str:
     except Exception:
         formatted_date = date_str
 
+    # Determine amount, direction & emoji
     amount = tx["amount"]
     money = f"${abs(amount):,.2f}"
     if amount > 0:
-        emoji, direction = "🟢💰", f"{money} received from"
+        emoji = "🟢💰"
+        direction = f"{money} received in {acct_name} from"
     else:
-        emoji, direction = "🔴💸", f"{money} sent to"
+        emoji = "🔴💸"
+        direction = f"{money} sent from {acct_name} to"
 
+    # Kind & status emojis
     kind_emoji = {
         "internalTransfer":      "🔁",
         "outgoingPayment":       "📤",
@@ -155,7 +160,7 @@ def notify_new_transactions():
             continue
 
         for tx in new_txs:
-            text = format_transaction_for_slack(tx)
+            text = format_transaction_for_slack(tx, acct_name)
             send_to_slack(text)
             sleep(0.1)
             seen_ids.add(tx["id"])
@@ -168,6 +173,7 @@ def notify_new_transactions():
 
 def main():
     notify_new_transactions()
+
 
 if __name__ == "__main__":
     main()
