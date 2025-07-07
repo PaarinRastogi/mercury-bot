@@ -102,6 +102,12 @@ def notify_new_transactions():
             continue
 
         for tx in reversed(recent):  # oldest→newest
+            tx_id = tx.get("id", "<no-id>")
+            amount = tx["amount"]
+            logger.info(
+                "Dispatching tx id=%s, account=%s, amount=%s to Slack",
+                tx_id, acct_name, amount
+            )
             text = format_transaction_for_slack(tx, acct_name)
             send_transaction_to_slack(text, tx["amount"] > 0)
             sleep(0.1)
