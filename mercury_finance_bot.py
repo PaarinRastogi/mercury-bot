@@ -3,6 +3,9 @@ import requests
 import logging
 from time import sleep
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+
 
 # ——— CONFIG ———
 API_KEY           = os.getenv("API_KEY")           or _raise_env_error("API_KEY")
@@ -42,8 +45,12 @@ def fetch_transactions(account_id: str) -> list[dict]:
 def format_transaction_for_slack(tx: dict, acct_name: str) -> str:
     """Build message text for one transaction."""
     # timestamp
-    dt = datetime.fromisoformat(tx["createdAt"].replace("Z", "+00:00"))
-    formatted_date = dt.strftime("%-I:%M %p on %B %d, %Y")
+    # parse UTC timestamp
+    dt_utc = datetime.fromisoformat(tx["createdAt"].replace("Z", "+00:00"))
+    # convert to America/Los_Angeles (handles PST/PDT automatically)
+    dt_pacific = dt_utc.astimezone(ZoneInfo("America/Los_Angeles"))
+    # format in local time
+    formatted_date = dt_pacific.strftime("%-I:%M %p on %B %d, %Y")
 
     amount = tx["amount"]
     money = f"${abs(amount):,.2f}"
